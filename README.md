@@ -1,4 +1,4 @@
-# test_next_course
+# next_modern_stack
 
 To install dependencies:
 
