@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev:web": "bun --filter web dev"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
