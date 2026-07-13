@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev:web": "bun --filter web dev"
+    "dev:web": "bun scripts/dev-web.ts",
+    "dev:web:kill": "taskkill /F /IM node.exe 2>nul || true"
   },
   "devDependencies": {
     "@types/bun": "latest"
