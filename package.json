@@ -8,6 +8,7 @@
     "dev:web:kill": "taskkill /F /IM node.exe 2>nul || true"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
