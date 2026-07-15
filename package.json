@@ -5,7 +5,10 @@
   "private": true,
   "scripts": {
     "dev:web": "bun scripts/dev-web.ts",
-    "dev:web:kill": "taskkill /F /IM node.exe 2>nul || true"
+    "dev:web:kill": "taskkill /F /IM node.exe 2>nul || true",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.3",

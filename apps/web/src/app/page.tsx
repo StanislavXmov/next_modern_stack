@@ -1,5 +1,5 @@
-import { PageWrapper } from "@/modules/shared/page-wrapper";
 import Link from "next/link";
+import { PageWrapper } from "@/modules/shared/page-wrapper";
 
 export default function Home() {
   return (
