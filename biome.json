@@ -6,11 +6,18 @@
       "!!.vscode",
       "!!**/.next",
       "!!**/node_modules",
-      "!!apps/web/public"
+      "!!apps/web/public",
+      "!!**/apps/api/dist",
+      "!!**/test"
     ]
   },
   "linter": {
-    "enabled": true
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useImportType": "off"
+      }
+    }
   },
   "formatter": {
     "enabled": true,
