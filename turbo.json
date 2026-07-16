@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "dev": {
+      "persistent": true
+    },
+    "build": {
+      "outputs": ["dist/**", ".next/**"]
+    }
+  },
+  "ui": "tui"
+}
