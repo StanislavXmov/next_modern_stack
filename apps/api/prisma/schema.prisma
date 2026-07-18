@@ -12,3 +12,21 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  parent    Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  children  Folder[] @relation("FolderToFolder")
+  notes     Note[]
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  text      String
+  folderId  Int
+  folder    Folder   @relation(fields: [folderId], references: [id])
+  createdAt DateTime @default(now())
+}
