@@ -3,6 +3,7 @@
     "dev": {
       "persistent": true
     },
+    "generate": {},
     "build": {
       "outputs": ["dist/**", ".next/**"]
     }

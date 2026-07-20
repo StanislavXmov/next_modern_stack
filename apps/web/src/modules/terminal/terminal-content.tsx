@@ -1,10 +1,4 @@
-interface Folder {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Folder } from "@/generated/api";
 
 export function TerminalContent({ folders }: { folders: Folder[] }) {
   return (

@@ -14,7 +14,8 @@
     "dev:api": "bun --filter api start:dev",
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "generate": "turbo run generate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
