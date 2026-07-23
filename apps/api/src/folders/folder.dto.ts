@@ -14,7 +14,7 @@ export class FolderDto {
   @ApiProperty({ example: null })
   parent?: FolderDto | null;
 
-  @ApiProperty({ example: [] })
+  @ApiProperty({ example: [], type: [FolderDto] })
   children: FolderDto[];
 
   @ApiProperty({ example: "2024-01-01T00:00:00.000Z" })
