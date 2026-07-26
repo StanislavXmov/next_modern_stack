@@ -1,5 +1,5 @@
 import { ApiProperty, ApiSchema } from "@nestjs/swagger";
-import { NoteDto } from "./note.dto";
+import { NoteDto } from "../notes/note.dto";
 
 @ApiSchema({ name: "Folder" })
 export class FolderDto {
