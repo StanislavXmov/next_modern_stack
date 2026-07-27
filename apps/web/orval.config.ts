@@ -5,7 +5,8 @@ export default defineConfig({
     input: "http://localhost:3005/api-docs-json",
     output: {
       target: "./src/generated/api.ts",
-      client: "fetch",
+      client: "react-query",
+      httpClient: "fetch",
       baseUrl: "http://localhost:3005",
     },
   },

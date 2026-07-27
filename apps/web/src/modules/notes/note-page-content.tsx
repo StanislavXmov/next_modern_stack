@@ -2,12 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Note, updateNote } from "@/generated/api";
+import { Note, useUpdateNote } from "@/generated/api";
 import { TerminalToast } from "../shared/terminal-toast";
 
 export function NotePageContent({ note }: { note: Note }) {
   const [text, setText] = useState(note.text);
   const [toast, setToast] = useState<string | null>(null);
+  const { mutateAsync: updateNote } = useUpdateNote();
   const router = useRouter();
   const searchParams = useSearchParams();
   const folder = searchParams.get("folder") ?? "";
@@ -15,10 +16,10 @@ export function NotePageContent({ note }: { note: Note }) {
 
   const save = useCallback(
     async (value: string) => {
-      await updateNote(String(note.id), { text: value });
+      await updateNote({ id: String(note.id), data: { text: value } });
       setToast("> Note saved");
     },
-    [note.id],
+    [note.id, updateNote],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

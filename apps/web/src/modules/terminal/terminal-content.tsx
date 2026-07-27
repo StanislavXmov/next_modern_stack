@@ -1,29 +1,19 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
+
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createNote, Folder, Note } from "@/generated/api";
-import { TerminalToast } from "../shared/terminal-toast";
+import {
+  Folder,
+  getGetFoldersQueryKey,
+  Note,
+  useCreateNote,
+  useGetFolders,
+} from "@/generated/api";
+import { TerminalToast } from "@/modules/shared/terminal-toast";
 import { TerminalFolder } from "./terminal-folder";
-
-function parsePath(path: string): number[] {
-  return path.split(",").map(Number).filter(Boolean);
-}
-
-function getSelectedNotes(folders: Folder[], path: number[]): Note[] {
-  let current = folders;
-  let selected: Folder | undefined;
-
-  for (const id of path) {
-    selected = current.find((folder) => folder.id === id);
-    if (!selected) break;
-    current = selected.children || [];
-  }
-
-  return selected?.notes || [];
-}
 
 function buildColumns(folders: Folder[], path: number[]): Folder[][] {
   const columns: Folder[][] = [folders];
@@ -41,8 +31,40 @@ function buildColumns(folders: Folder[], path: number[]): Folder[][] {
   return columns;
 }
 
-export function TerminalContent({ folders }: { folders: Folder[] }) {
-  const router = useRouter();
+function getSelectedNotes(folders: Folder[], path: number[]): Note[] {
+  let current = folders;
+  let selected: Folder | undefined;
+
+  for (const id of path) {
+    selected = current.find((folder) => folder.id === id);
+    if (!selected) break;
+    current = selected.children || [];
+  }
+
+  return selected?.notes || [];
+}
+
+function parsePath(path: string): number[] {
+  return path.split(",").map(Number).filter(Boolean);
+}
+
+export function TerminalContent({
+  folders: initialFolders,
+}: {
+  folders: Folder[];
+}) {
+  const queryClient = useQueryClient();
+  const { data: foldersData } = useGetFolders({
+    query: {
+      initialData: {
+        data: initialFolders,
+        status: 200,
+        headers: new Headers(),
+      },
+    },
+  });
+  const folders = foldersData?.data ?? initialFolders;
+  const { mutateAsync: createNote } = useCreateNote();
   const [path, setPath] = useQueryState("folder", {
     defaultValue: "",
   });
@@ -60,7 +82,6 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
 
   const columns = buildColumns(folders, parsePath(path));
   const notes = getSelectedNotes(folders, parsePath(path));
-
   const currentPath = parsePath(path);
   const hasFolderSelected = currentPath.length > 0;
 
@@ -81,12 +102,12 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
     if (!promptText.trim()) return;
 
     const folderId = currentPath[currentPath.length - 1];
-    await createNote({ text: promptText.trim(), folderId });
+    await createNote({ data: { text: promptText.trim(), folderId } });
     setShowPrompt(false);
     setPromptText("");
     setToast("> Note created");
-    router.refresh();
-  }, [promptText, currentPath, router]);
+    queryClient.invalidateQueries({ queryKey: getGetFoldersQueryKey() });
+  }, [promptText, currentPath, queryClient, createNote]);
 
   const handlePromptKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
