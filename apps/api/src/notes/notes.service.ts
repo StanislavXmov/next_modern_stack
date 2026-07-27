@@ -9,4 +9,12 @@ export class NotesService {
       where: { id },
     });
   }
+
+  create(text: string, folderId: number) {
+    return this.prisma.note.create({ data: { text, folderId } });
+  }
+
+  update(id: number, text: string) {
+    return this.prisma.note.update({ where: { id }, data: { text } });
+  }
 }

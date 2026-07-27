@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { Folder, Note } from "@/generated/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createNote, Folder, Note } from "@/generated/api";
+import { TerminalToast } from "../shared/terminal-toast";
 import { TerminalFolder } from "./terminal-folder";
 
 function parsePath(path: string): number[] {
@@ -39,18 +42,32 @@ function buildColumns(folders: Folder[], path: number[]): Folder[][] {
 }
 
 export function TerminalContent({ folders }: { folders: Folder[] }) {
+  const router = useRouter();
   const [path, setPath] = useQueryState("folder", {
     defaultValue: "",
   });
 
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [promptText, setPromptText] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const promptRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showPrompt) {
+      promptRef.current?.focus();
+    }
+  }, [showPrompt]);
+
   const columns = buildColumns(folders, parsePath(path));
   const notes = getSelectedNotes(folders, parsePath(path));
+
+  const currentPath = parsePath(path);
+  const hasFolderSelected = currentPath.length > 0;
 
   const handleSelectedFolder = (folderId: number, colIndex: number) => {
     const currentPath = parsePath(path);
 
     if (currentPath[colIndex] === folderId) {
-      // Deselect if already selected
       const newPath = currentPath.slice(0, colIndex);
       setPath(newPath.join(","));
       return;
@@ -58,6 +75,26 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
 
     const newPath = [...currentPath.slice(0, colIndex), folderId];
     setPath(newPath.join(","));
+  };
+
+  const handleCreateNote = useCallback(async () => {
+    if (!promptText.trim()) return;
+
+    const folderId = currentPath[currentPath.length - 1];
+    await createNote({ text: promptText.trim(), folderId });
+    setShowPrompt(false);
+    setPromptText("");
+    setToast("> Note created");
+    router.refresh();
+  }, [promptText, currentPath, router]);
+
+  const handlePromptKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleCreateNote();
+    } else if (e.key === "Escape") {
+      setShowPrompt(false);
+      setPromptText("");
+    }
   };
 
   return (
@@ -81,7 +118,7 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
               </div>
             </div>
           ))}
-          {notes.length > 0 && (
+          {(notes.length > 0 || hasFolderSelected) && (
             <div>
               <div className="border-b mb-2">Notes:</div>
               {notes.map((note) => {
@@ -93,7 +130,7 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
 
                 return (
                   <Link
-                    href={`/notes/${note.id}`}
+                    href={`/notes/${note.id}?folder=${path}`}
                     key={note.id}
                     className="mb-1 cursor-pointer hover:bg-gray-700 rounded block"
                   >
@@ -101,10 +138,32 @@ export function TerminalContent({ folders }: { folders: Folder[] }) {
                   </Link>
                 );
               })}
+              {hasFolderSelected && !showPrompt && (
+                <button
+                  type="button"
+                  onClick={() => setShowPrompt(true)}
+                  className="mt-1 cursor-pointer hover:bg-gray-700 rounded text-green-600 hover:text-green-400"
+                >
+                  [+] new_note.txt
+                </button>
+              )}
             </div>
           )}
         </div>
+        {showPrompt && (
+          <div className="mt-2 flex items-center">
+            <span>$ note text:&nbsp;</span>
+            <input
+              ref={promptRef}
+              value={promptText}
+              onChange={(e) => setPromptText(e.target.value)}
+              onKeyDown={handlePromptKeyDown}
+              className="bg-transparent text-green-500 outline-none border-none flex-1 font-mono"
+            />
+          </div>
+        )}
       </div>
+      {toast && <TerminalToast message={toast} onDone={() => setToast(null)} />}
     </div>
   );
 }
